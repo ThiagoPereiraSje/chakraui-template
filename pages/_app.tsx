@@ -1,8 +1,27 @@
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
+import type { NextPage } from "next";
 import Head from "next/head";
 
-export default function App({ Component, pageProps }: AppProps) {
+import { ChakraProvider } from "@chakra-ui/react";
+
+import theme from "src/theme";
+import Layout from "src/components/Layout";
+import React from "react";
+
+type MyNextPage = {
+  getLayout: (page: React.ReactElement) => React.ReactNode;
+} & NextPage;
+
+type MyApp = {
+  Component: MyNextPage;
+} & AppProps;
+
+export default function App({ Component, pageProps }: MyApp) {
+  const getLayout = Component.getLayout
+    ? Component.getLayout
+    : (page: React.ReactElement) => <Layout>{page}</Layout>;
+
   return (
     <>
       <Head>
@@ -11,7 +30,10 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Component {...pageProps} />
+
+      <ChakraProvider theme={theme}>
+        {getLayout(<Component {...pageProps} />)}
+      </ChakraProvider>
     </>
   );
 }
